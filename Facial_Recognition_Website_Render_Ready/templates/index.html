@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FaceLab — PCA Facial Recognition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#"><span class="brand-mark">F</span><span>Face<span class="brand-light">Lab</span></span></a>
+    <nav><a href="#recognize">Recognition</a><a href="#technology">Technology</a><a href="#results">Model results</a></nav>
+    <a class="top-cta" href="#recognize">Try the demo <span>↗</span></a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="pulse"></span> LINEAR ALGEBRA · MACHINE LEARNING</div>
+        <h1>Facial recognition,<br><span>explained by data.</span></h1>
+        <p class="hero-text">Explore how Eigenvalues, Eigenvectors and Principal Component Analysis turn facial images into meaningful features — then classify them with K-Nearest Neighbors.</p>
+        <div class="hero-actions"><a class="btn primary" href="#recognize">Start recognition <span>→</span></a><a class="text-link" href="#technology">Explore the method <span>↓</span></a></div>
+        <div class="hero-meta"><div class="avatar-stack"><i>◉</i><i>⌁</i><i>▦</i></div><span>Olivetti Faces dataset · 40 identities · 400 images</span></div>
+      </div>
+      <div class="hero-visual">
+        <div class="visual-orbit orbit-one"></div><div class="visual-orbit orbit-two"></div>
+        <div class="face-card">
+          <div class="face-top"><span>FEATURE EXTRACTION</span><span class="live-dot">● LIVE MODEL</span></div>
+          <div class="face-grid">
+            <div class="face-placeholder"><div class="head-shape"><i></i><b></b><em></em></div><div class="scan-line"></div></div>
+            <div class="feature-lines"><span></span><span></span><span></span><span></span><span></span></div>
+          </div>
+          <div class="face-bottom"><span>64 × 64 PIXELS</span><span>100 PCA COMPONENTS</span></div>
+        </div>
+        <div class="float-chip chip-a"><b>λ</b><span>Eigenvalues</span></div>
+        <div class="float-chip chip-b"><b>k=3</b><span>KNN classifier</span></div>
+        <div class="visual-caption">FROM PIXELS TO PRINCIPAL COMPONENTS</div>
+      </div>
+    </section>
+
+    <section class="stats" id="model-stats">
+      <div><span class="stat-label">DATASET IMAGES</span><strong id="stat-images">400</strong><small>Olivetti Faces</small></div>
+      <div><span class="stat-label">IDENTITY CLASSES</span><strong id="stat-people">40</strong><small>Numeric labels</small></div>
+      <div><span class="stat-label">PCA COMPONENTS</span><strong>100</strong><small>Randomized solver</small></div>
+      <div><span class="stat-label">CLASSIFIER</span><strong>KNN · 3</strong><small>Nearest neighbors</small></div>
+    </section>
+
+    <section class="section recognize-section" id="recognize">
+      <div class="section-heading">
+        <div><div class="eyebrow">01 / INTERACTIVE DEMO</div><h2>Try facial recognition</h2></div>
+        <p>Upload a clear, front-facing face image. The model will project it into PCA feature space and return the closest dataset identity.</p>
+      </div>
+      <div class="recognition-layout">
+        <div class="upload-panel">
+          <div class="panel-head"><div><span class="step-tag">STEP 01</span><h3>Upload an image</h3></div><span class="format-tag">JPG · PNG · up to 8 MB</span></div>
+          <form id="upload-form">
+            <label class="dropzone" id="dropzone" for="image-input">
+              <input id="image-input" type="file" name="image" accept="image/png,image/jpeg,image/webp" hidden>
+              <div class="upload-icon">↑</div><strong>Drop your image here</strong><span>or <u>browse files</u></span>
+              <small>For best demo results, use a centered face with good lighting.</small>
+            </label>
+            <div class="selected-file" id="selected-file" hidden><span class="file-icon">▧</span><span id="file-name"></span><button type="button" id="remove-file" aria-label="Remove image">×</button></div>
+            <button class="btn primary full" id="recognize-btn" type="submit" disabled>Recognize face <span>→</span></button>
+          </form>
+          <div class="privacy-note"><span>♢</span> Images are processed locally and are not saved by this demo.</div>
+        </div>
+        <div class="result-panel" id="result-panel">
+          <div class="panel-head"><div><span class="step-tag">STEP 02</span><h3>Recognition result</h3></div><span class="result-status" id="result-status">AWAITING IMAGE</span></div>
+          <div class="empty-result" id="empty-result"><div class="result-symbol">◎</div><strong>Your result will appear here</strong><span>Upload an image to run the PCA + KNN pipeline.</span></div>
+          <div class="recognition-result" id="recognition-result" hidden>
+            <div class="result-image-wrap"><img id="preview-image" alt="Uploaded image preview"></div>
+            <div class="result-copy"><span class="result-label">PREDICTED DATASET IDENTITY</span><strong id="predicted-id">Person 00</strong><p id="confidence-note"></p><div class="nearest-title">3 NEAREST MATCHES</div><div id="nearest-list"></div></div>
+          </div>
+          <div class="error-message" id="error-message" hidden></div>
+        </div>
+      </div>
+      <p class="scope-note"><b>Research demo:</b> Results are numeric classes from the Olivetti dataset, not real-world names or identity verification. Uploaded photos are resized to 64×64 grayscale; this demo does not automatically detect or crop faces.</p>
+    </section>
+
+    <section class="section technology" id="technology">
+      <div class="section-heading">
+        <div><div class="eyebrow">02 / HOW IT WORKS</div><h2>From an image to an identity</h2></div>
+        <p>The implementation follows the same mathematical workflow as the Python project: image representation, PCA feature extraction and KNN classification.</p>
+      </div>
+      <div class="steps-grid">
+        <article class="step-card"><span class="step-number">01</span><div class="step-icon">▦</div><h3>Image matrix</h3><p>Each grayscale image is resized to 64 × 64 pixels and represented as a vector of 4,096 intensity values.</p><code>I ∈ R⁴⁰⁹⁶</code></article>
+        <article class="step-card"><span class="step-number">02</span><div class="step-icon">∑</div><h3>Mean centering & PCA</h3><p>PCA identifies directions of maximum variation and compresses the image into 100 principal components.</p><code>Av = λv</code></article>
+        <article class="step-card"><span class="step-number">03</span><div class="step-icon">⌁</div><h3>Eigenfaces</h3><p>Principal components form eigenfaces — visual patterns that capture important variations across faces.</p><code>ω = Uᵀ(I − Ψ)</code></article>
+        <article class="step-card"><span class="step-number">04</span><div class="step-icon">◎</div><h3>KNN prediction</h3><p>A 3-nearest-neighbors classifier compares projected features and predicts the closest dataset identity.</p><code>k = 3</code></article>
+      </div>
+    </section>
+
+    <section class="section results-section" id="results">
+      <div class="section-heading">
+        <div><div class="eyebrow">03 / MODEL INSIGHTS</div><h2>Visualize the model</h2></div>
+        <p>Visual outputs generated by the original Python scripts are included below. They illustrate the dataset, eigenfaces, eigenvalue distribution and evaluation.</p>
+      </div>
+      <div class="gallery-grid">
+        <article class="gallery-card wide"><img src="{{ url_for('static', filename='images/04_eigenfaces.png') }}" alt="Eigenfaces generated by PCA"><div><span>FEATURE EXTRACTION</span><h3>Eigenfaces visualization</h3><p>The first 10 principal components shown as facial patterns.</p></div></article>
+        <article class="gallery-card"><img src="{{ url_for('static', filename='images/03_mean_face.png') }}" alt="Mean face"><div><span>DATA PREPROCESSING</span><h3>Mean face</h3><p>Average pixel intensity across the dataset.</p></div></article>
+        <article class="gallery-card"><img src="{{ url_for('static', filename='images/05_eigenvalue_graph.png') }}" alt="Eigenvalue graph"><div><span>DIMENSIONALITY REDUCTION</span><h3>Eigenvalue distribution</h3><p>Variance captured by each principal component.</p></div></article>
+        <article class="gallery-card"><img src="{{ url_for('static', filename='images/06_actual_vs_predicted.png') }}" alt="Actual versus predicted faces"><div><span>CLASSIFICATION</span><h3>Actual vs predicted</h3><p>Comparison of test labels and model predictions.</p></div></article>
+        <article class="gallery-card wide"><img src="{{ url_for('static', filename='images/07_confusion_matrix.png') }}" alt="Confusion matrix"><div><span>PERFORMANCE EVALUATION</span><h3>Confusion matrix</h3><p>Class-wise comparison of actual and predicted labels.</p></div></article>
+      </div>
+      <div class="metric-strip"><div><span>HOLD-OUT TEST SPLIT</span><b>70% / 30%</b></div><div><span>FEATURE DIMENSIONS</span><b>4,096 → 100</b></div><div><span>MODEL</span><b>PCA + KNN</b></div><div><span>DATASET</span><b>Olivetti Faces</b></div></div>
+    </section>
+
+    <section class="about-band">
+      <div><div class="eyebrow">THE PROJECT</div><h2>Linear algebra in a real-world application.</h2><p>This academic demonstration connects eigenvalues, eigenvectors, covariance, dimensionality reduction and classification in one practical workflow.</p></div>
+      <div class="about-mark">λ<span>×</span>v</div>
+    </section>
+  </main>
+  <footer><a class="brand" href="#"><span class="brand-mark">F</span><span>Face<span class="brand-light">Lab</span></span></a><span>Facial Recognition using Eigenvalues, Eigenvectors, PCA & KNN</span><span>Academic project · 2026</span></footer>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
